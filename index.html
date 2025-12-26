@@ -1,250 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instagram Reel Architect Pro - Regional</title>
-    <style>
-        :root { --ig-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); --bg: #0a0a0a; --card: #1a1a1a; --accent: #00d4ff; --success: #00e676; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; padding: 20px; line-height: 1.5; }
-        .app-shell { max-width: 950px; margin: auto; background: var(--card); border-radius: 15px; padding: 30px; border: 1px solid #333; }
-        
-        .usage-bar { text-align: center; font-size: 12px; margin-bottom: 20px; color: #888; border-bottom: 1px solid #333; padding-bottom: 15px; }
-        .usage-count { color: var(--success); font-weight: bold; }
+const { Client, RemoteAuth } = require('whatsapp-web.js');
+const qrcode = require('qrcode-terminal');
+const axios = require('axios');
 
-        label { display: block; margin-top: 15px; font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; }
-        input, textarea, select { width: 100%; padding: 12px; background: #000; border: 1px solid #444; border-radius: 8px; color: #fff; margin-top: 5px; box-sizing: border-box; }
-        
-        .grid-layout { display: grid; grid-template-columns: 1.5fr 1fr 1.5fr; gap: 15px; }
-        
-        .btn { background: var(--ig-gradient); color: white; border: none; padding: 20px; width: 100%; border-radius: 12px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 25px; transition: 0.3s; }
-        .btn:hover { transform: scale(1.01); filter: brightness(1.1); }
-        .btn:disabled { background: #444; cursor: not-allowed; filter: grayscale(1); }
+// Using Environment Variables for safety
+const GEMINI_API_KEY = process.env.GEMINI_KEY;
 
-        .result-section { display: none; margin-top: 30px; border-top: 1px solid #444; padding-top: 20px; }
-        .box { background: #000; padding: 20px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; position: relative; }
-        .copy-btn { position: absolute; top: 10px; right: 10px; color: #3ea6ff; cursor: pointer; font-size: 11px; font-weight: bold; }
-        
-        #loader { display: none; text-align: center; color: #f09433; margin-top: 20px; font-weight: bold; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 50% { opacity: 0.5; } }
-        .error-msg { color: #ffbb00; background: #332200; padding: 15px; border-radius: 8px; border: 1px solid #ffbb00; text-align: center; margin-top: 15px; display: none; }
-    </style>
-</head>
-<body>
-
-<div class="app-shell">
-    <h1 style="text-align:center; margin-top:0; background: var(--ig-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Instagram Reel Architect</h1>
-    <div class="usage-bar">Daily Usage: <span id="used" class="usage-count">0</span> / 5 Viral Scripts</div>
-
-    <label>Gemini API Key</label>
-    <input type="password" id="apiKey" placeholder="Paste your API key...">
-
-    <div class="grid-layout">
-        <div>
-            <label>Niche / Category</label>
-            <select id="category">
-                <optgroup label="Educational & How-To">
-                    <option>Facts & explanations</option><option>Did you know?</option><option>How-to / Step-by-step</option>
-                    <option>Tips & tricks</option><option>Myth vs Fact</option><option>Explainer reels</option>
-                    <option>Tutorials</option><option>Case studies</option><option>Comparisons</option><option>FAQs</option>
-                </optgroup>
-                <optgroup label="Business & Marketing">
-                    <option>Business tips</option><option>Startup lessons</option><option>Marketing strategies</option>
-                    <option>Instagram / YouTube growth</option><option>Sales techniques</option><option>Branding advice</option>
-                    <option>Customer psychology</option><option>Local business solutions</option><option>Lead generation</option>
-                    <option>Offer explanation</option>
-                </optgroup>
-                <optgroup label="Finance & Money">
-                    <option>Investment basics</option><option>Saving tips</option><option>Mutual fund explanation</option>
-                    <option>Stock market basics</option><option>Budget planning</option><option>Loan & EMI explanation</option>
-                    <option>Financial mistakes</option><option>Side income models</option><option>Tax saving tips</option>
-                    <option>Money mindset</option>
-                </optgroup>
-                <optgroup label="Mindset & Motivation">
-                    <option>Motivational talks</option><option>Life lessons</option><option>Success / failure stories</option>
-                    <option>Mindset training</option><option>Discipline & habits</option><option>Goal setting</option>
-                    <option>Productivity</option><option>Confidence coaching</option><option>Career guidance</option>
-                    <option>Self-improvement</option>
-                </optgroup>
-                <optgroup label="Astro & Spiritual">
-                    <option>Numerology</option><option>Lo Shu Grid</option><option>Astrology basics</option>
-                    <option>Remedies explanation</option><option>Affirmations</option><option>Mantra meanings</option>
-                    <option>Spiritual education</option><option>Problem → remedy</option>
-                </optgroup>
-                <optgroup label="Tech & AI">
-                    <option>App explanation</option><option>AI tool demos</option><option>ChatGPT usage</option>
-                    <option>Website tips</option><option>Software tutorials</option><option>Automation</option>
-                    <option>Online tools</option><option>Tech education</option><option>Gadget explanation</option>
-                    <option>Digital safety</option>
-                </optgroup>
-                <optgroup label="Sales & Product">
-                    <option>Product review</option><option>Problem → Solution pitch</option><option>Offer announcement</option>
-                    <option>Price justification</option><option>Feature explanation</option><option>How to use</option>
-                    <option>Comparison reels</option><option>Objection handling</option><option>Testimonial narration</option>
-                </optgroup>
-                <optgroup label="Social Awareness">
-                    <option>Awareness campaigns</option><option>Scam alerts</option><option>Govt scheme explanation</option>
-                    <option>Public safety</option><option>Mental health</option><option>Education awareness</option>
-                    <option>Digital fraud alerts</option><option>Social reform</option><option>Youth guidance</option>
-                </optgroup>
-                <optgroup label="Vlogs">
-                    <option>Travel vlog</option><option>Personal Vlog</option><option>Daily Vlog</option>
-                </optgroup>
-            </select>
-        </div>
-        <div>
-            <label>Duration</label>
-            <select id="duration">
-                <option value="20 sec">20 Sec</option>
-                <option value="30 sec" selected>30 Sec</option>
-                <option value="45 sec">45 Sec</option>
-                <option value="60 sec">60 Sec</option>
-            </select>
-        </div>
-        <div>
-            <label>Regional Language</label>
-            <select id="lang">
-                <option value="Simple day to day Hindi (Northern India style)">Hindi (Simple)</option>
-                <option value="Day to day Haryanvi (Desi style)">Haryanvi</option>
-                <option value="Simple day to day Marathi (Maharashtra style)">Marathi</option>
-                <option value="Simple day to day Gujarati (Gujarat style)">Gujarati</option>
-                <option value="Simple day to day Bengali (West Bengal style)">Bengali</option>
-                <option value="Simple day to day Assamese (Assam style)">Assamese</option>
-                <option value="Simple day to day Punjabi (Punjab style)">Punjabi</option>
-                <option value="Simple day to day Tamil (Tamil Nadu style)">Tamil</option>
-                <option value="Simple day to day Telugu (Telangana/AP style)">Telugu</option>
-                <option value="Simple day to day Kannada (Karnataka style)">Kannada</option>
-                <option value="Simple day to day Malayalam (Kerala style)">Malayalam</option>
-                <option value="English (Conversational)">English</option>
-            </select>
-        </div>
-    </div>
-
-    <label>What is the specific topic/detail for this Reel?</label>
-    <textarea id="details" rows="4" placeholder="Example: 3 simple morning habits for high energy..."></textarea>
-
-    <button class="btn" id="genBtn" onclick="generateReel()">ARCHITECT VIRAL REEL</button>
-
-    <div id="loader">🚀 ANALYZING HOOKS & LOCAL DIALECTS...</div>
-    <div id="errorBox" class="error-msg"></div>
-
-    <div id="results" class="result-section">
-        <div class="box">
-            <span class="copy-btn" onclick="copy('resScript')">COPY</span>
-            <label style="color: var(--accent);">Visual Script (Hook → Body → CTA)</label>
-            <div id="resScript" style="white-space: pre-wrap; margin-top:10px; font-size:14px; color: #ddd;"></div>
-        </div>
-
-        <div class="box">
-            <span class="copy-btn" onclick="copy('resSEO')">COPY</span>
-            <label style="color: var(--success);">Viral Caption & Hashtags</label>
-            <div id="resSEO" style="white-space: pre-wrap; margin-top:10px; font-size:14px; color: #ddd;"></div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const MAX_DAILY = 5;
-
-    window.onload = () => {
-        updateUsageUI();
-        const key = localStorage.getItem('_ig_reg_key');
-        if (key) document.getElementById('apiKey').value = key;
-    };
-
-    function updateUsageUI() {
-        const usage = getUsage();
-        document.getElementById('used').innerText = usage;
-        if (usage >= MAX_DAILY) {
-            document.getElementById('genBtn').disabled = true;
-            document.getElementById('genBtn').innerText = "LIMIT REACHED (CHECK TOMORROW)";
-        }
+const client = new Client({
+    authStrategy: new RemoteAuth({ /* Optional: for cloud saving */ }),
+    puppeteer: {
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required for Linux/Cloud hosting
     }
+});
 
-    function getUsage() {
-        const date = new Date().toISOString().split('T')[0];
-        const data = JSON.parse(localStorage.getItem('_ig_usage_reg') || '{}');
-        return data[date] || 0;
-    }
+client.on('qr', (qr) => {
+    // On GitHub/Cloud, you check the logs to see this QR
+    qrcode.generate(qr, { small: true });
+});
 
-    function trackUsage() {
-        const date = new Date().toISOString().split('T')[0];
-        const data = JSON.parse(localStorage.getItem('_ig_usage_reg') || '{}');
-        data[date] = (data[date] || 0) + 1;
-        localStorage.setItem('_ig_usage_reg', JSON.stringify(data));
-        updateUsageUI();
-    }
+client.on('ready', () => {
+    console.log('WA Bot is Online!');
+});
 
-    async function generateReel() {
-        const key = document.getElementById('apiKey').value.trim();
-        const cat = document.getElementById('category').value;
-        const dur = document.getElementById('duration').value;
-        const lang = document.getElementById('lang').value;
-        const details = document.getElementById('details').value;
-        
-        const loader = document.getElementById('loader');
-        const results = document.getElementById('results');
-        const errorBox = document.getElementById('errorBox');
-
-        if (!key || !details) return alert("Bhai, Key aur Details dono zaroori hain!");
-        if (getUsage() >= MAX_DAILY) return alert("Daily limit over!");
-
-        localStorage.setItem('_ig_reg_key', key);
-        loader.style.display = 'block';
-        results.style.display = 'none';
-        errorBox.style.display = 'none';
-
-        const prompt = `Act as a Viral Content Creator for Instagram. 
-        Category: "${cat}". Duration: ${dur}. Language Style: ${lang}. 
-        Details: "${details}".
-
-        RULES:
-        1. Script must be in ${lang} using simple, day-to-day spoken words.
-        2. NO complex or formal grammar. Use local slang where natural.
-        3. Structure: Strong Hook (0-3s), High-Value Body, and Clear CTA.
-        4. Provide an SEO-rich caption and 10 viral hashtags.
-
-        Format:
-        SCRIPT: [The Script]
-        SEO: [Caption and Hashtags]`;
-
+client.on('message', async (msg) => {
+    if (msg.body.startsWith('!ai ')) {
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-
-            const data = await response.json();
-
-            if (response.status === 429) {
-                errorBox.innerText = "Bhai, this is your current limit for the day. Come back tomorrow after 24 hours!";
-                errorBox.style.display = "block";
-            } else if (data.candidates) {
-                const fullText = data.candidates[0].content.parts[0].text;
-                document.getElementById('resScript').innerText = fullText.split('SCRIPT:')[1]?.split('SEO:')[0]?.trim();
-                document.getElementById('resSEO').innerText = fullText.split('SEO:')[1]?.trim();
-                
-                results.style.display = 'block';
-                trackUsage();
-            } else {
-                throw new Error("API Issue. Please check your key.");
-            }
+            const userQuery = msg.body.replace('!ai ', '');
+            const response = await axios.post(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+                { contents: [{ parts: [{ text: userQuery }] }] }
+            );
+            msg.reply(response.data.candidates[0].content.parts[0].text);
         } catch (err) {
-            errorBox.innerText = "Error: " + err.message;
-            errorBox.style.display = "block";
-        } finally {
-            loader.style.display = 'none';
+            msg.reply("Error connecting to Gemini.");
         }
     }
+});
 
-    function copy(id) {
-        const el = document.getElementById(id);
-        navigator.clipboard.writeText(el.innerText);
-        alert("Copied!");
-    }
-</script>
-
-</body>
-</html>
+client.initialize();
