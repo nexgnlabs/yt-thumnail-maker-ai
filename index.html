@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thumbnail Architect Pro - 2025 Edition</title>
+    <style>
+        :root { --yt-red: #ff0000; --bg: #0a0a0a; --card: #1a1a1a; --accent: #00d4ff; --success: #00e676; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; padding: 20px; }
+        .app-shell { max-width: 900px; margin: auto; background: var(--card); border-radius: 12px; padding: 25px; border: 1px solid #333; }
+        
+        .usage-bar { text-align: center; font-size: 12px; margin-bottom: 15px; color: #888; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .usage-count { color: var(--success); font-weight: bold; }
+
+        .api-setup { background: #000; padding: 15px; border-radius: 8px; border: 1px dashed #444; margin-bottom: 20px; }
+        .api-setup input { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; margin-top: 5px; box-sizing: border-box; }
+
+        label { display: block; margin-top: 15px; font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; }
+        input, textarea { width: 100%; padding: 12px; background: #000; border: 1px solid #444; border-radius: 8px; color: #fff; margin-top: 5px; box-sizing: border-box; }
+        
+        .btn { background: var(--yt-red); color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { background: #cc0000; transform: scale(1.01); }
+        .btn:disabled { background: #444; cursor: not-allowed; }
+
+        .result-container { display: none; margin-top: 30px; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .thumbnail-preview { width: 100%; aspect-ratio: 16/9; background: #222; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid var(--accent); position: relative; }
+        .thumbnail-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .overlay-info { background: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px; border-left: 4px solid var(--accent); margin-top: 20px; }
+        
+        #loader { display: none; text-align: center; color: var(--accent); margin-top: 20px; font-weight: bold; }
+        .error-msg { color: #ffbb00; background: #332200; padding: 15px; border-radius: 8px; border: 1px solid #ffbb00; text-align: center; margin-top: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <h2 style="text-align:center; margin-top:0; color: var(--yt-red);">🖼️ Thumbnail Architect Pro</h2>
+    
+    <div class="usage-bar">Daily Usage: <span id="used" class="usage-count">0</span> / 5 Concept Designs</div>
+
+    <div class="api-setup">
+        <label>Gemini API Key</label>
+        <input type="password" id="apiKey" placeholder="Paste your API key...">
+    </div>
+
+    <label>Video Topic</label>
+    <input type="text" id="topic" placeholder="e.g. How I made 1 Lakh in 30 days">
+
+    <label>Thumbnail Style</label>
+    <select id="style" style="width:100%; padding:12px; background:#000; color:#fff; border:1px solid #444; border-radius:8px; margin-top:5px;">
+        <option value="MrBeast Style (High Saturation, Emotional Face)">MrBeast Style</option>
+        <option value="Minimalist (Clean Typography, One Object)">Minimalist</option>
+        <option value="Storytelling (Before/After, Comparison)">Comparison / Story</option>
+        <option value="Tech/Review (Product Close-up, Glow)">Tech Review</option>
+    </select>
+
+    <label>Key Elements to Include</label>
+    <textarea id="notes" rows="3" placeholder="e.g. My face on the left, a bag of money on the right, red background..."></textarea>
+
+    <button class="btn" id="genBtn" onclick="generateThumbnail()">ARCHITECT THUMBNAIL</button>
+
+    <div id="loader">🎨 GEMINI IS DESIGNING THE PERFECT LAYOUT...</div>
+    <div id="errorBox" class="error-msg"></div>
+
+    <div id="result" class="result-container">
+        <label>Visual Concept Preview</label>
+        <div class="thumbnail-preview">
+            <img id="thumbImg" src="" alt="Thumbnail Preview">
+        </div>
+
+        <div class="overlay-info">
+            <h3 style="color: var(--accent); margin-top: 0;">AI Design Strategy</h3>
+            <div id="designStrategy" style="font-size: 14px; color: #ccc; line-height: 1.6;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const MAX_DAILY = 5;
+
+    window.onload = () => {
+        updateUsageUI();
+        const savedKey = localStorage.getItem('_thumb_v1_key');
+        if (savedKey) document.getElementById('apiKey').value = savedKey;
+    };
+
+    function updateUsageUI() {
+        const usage = getUsage();
+        document.getElementById('used').innerText = usage;
+        if (usage >= MAX_DAILY) {
+            const btn = document.getElementById('genBtn');
+            btn.disabled = true;
+            btn.innerText = "DAILY LIMIT REACHED (5/5)";
+        }
+    }
+
+    function getUsage() {
+        const date = new Date().toISOString().split('T')[0];
+        const data = JSON.parse(localStorage.getItem('_thumb_usage_log') || '{}');
+        return data[date] || 0;
+    }
+
+    function trackUsage() {
+        const date = new Date().toISOString().split('T')[0];
+        const data = JSON.parse(localStorage.getItem('_thumb_usage_log') || '{}');
+        data[date] = (data[date] || 0) + 1;
+        localStorage.setItem('_thumb_usage_log', JSON.stringify(data));
+        updateUsageUI();
+    }
+
+    async function generateThumbnail() {
+        const key = document.getElementById('apiKey').value.trim();
+        const topic = document.getElementById('topic').value;
+        const style = document.getElementById('style').value;
+        const notes = document.getElementById('notes').value;
+        
+        const loader = document.getElementById('loader');
+        const errorBox = document.getElementById('errorBox');
+        const result = document.getElementById('result');
+
+        if (getUsage() >= MAX_DAILY) return alert("Bhai, daily limit over. Come back tomorrow!");
+        if (!key || !topic) return alert("Please enter API Key and Topic!");
+
+        localStorage.setItem('_thumb_v1_key', key);
+        loader.style.display = 'block';
+        result.style.display = 'none';
+        errorBox.style.display = 'none';
+
+        const prompt = `Act as a Professional YouTube Thumbnail Designer. 
+        Video Topic: "${topic}". 
+        Desired Style: ${style}. 
+        User Notes: ${notes}.
+
+        TASK:
+        1. Create a "Strategy" in Hinglish explaining what text and images to use for high CTR.
+        2. Create a "Visual_Prompt" (English) for an image generator to create the background.
+        
+        Output format ONLY JSON:
+        {"strategy": "...", "visual_prompt": "..."}`;
+
+        try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
+
+            const data = await response.json();
+
+            if (response.status === 429) {
+                errorBox.innerText = "Bhai, this is your current limit for the day. Come back tomorrow after 24 hours!";
+                errorBox.style.display = "block";
+            } else if (data.candidates) {
+                let text = data.candidates[0].content.parts[0].text;
+                const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+                const designData = JSON.parse(jsonStr);
+
+                // Use a free image generator URL based on AI's prompt
+                const seed = Math.floor(Math.random() * 10000);
+                const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(designData.visual_prompt)}?width=1280&height=720&seed=${seed}&nologo=true`;
+
+                document.getElementById('thumbImg').src = imageUrl;
+                document.getElementById('designStrategy').innerText = designData.strategy;
+                
+                result.style.display = 'block';
+                trackUsage();
+            } else {
+                throw new Error("API Issue. Please check your key.");
+            }
+        } catch (err) {
+            errorBox.innerText = "Error: " + err.message;
+            errorBox.style.display = "block";
+        } finally {
+            loader.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
