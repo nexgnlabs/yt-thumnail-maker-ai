@@ -3,73 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thumbnail Architect v3.0 - Strategic Mode</title>
+    <title>Instagram Reel Architect Pro</title>
     <style>
-        :root { --yt-red: #ff0000; --bg: #0a0a0a; --card: #1a1a1a; --accent: #00d4ff; --success: #00e676; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; padding: 20px; }
-        .app-shell { max-width: 850px; margin: auto; background: var(--card); border-radius: 12px; padding: 25px; border: 1px solid #333; }
+        :root { --ig-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); --bg: #0a0a0a; --card: #1a1a1a; --accent: #00d4ff; --success: #00e676; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #fff; padding: 20px; line-height: 1.5; }
+        .app-shell { max-width: 900px; margin: auto; background: var(--card); border-radius: 15px; padding: 30px; border: 1px solid #333; box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
         
-        .usage-bar { text-align: center; font-size: 12px; margin-bottom: 15px; color: #888; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .usage-bar { text-align: center; font-size: 12px; margin-bottom: 20px; color: #888; border-bottom: 1px solid #333; padding-bottom: 15px; }
         .usage-count { color: var(--success); font-weight: bold; }
 
         label { display: block; margin-top: 15px; font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; }
-        input, textarea, select { width: 100%; padding: 12px; background: #000; border: 1px solid #444; border-radius: 8px; color: #fff; margin-top: 5px; box-sizing: border-box; font-family: inherit; }
+        input, textarea, select { width: 100%; padding: 12px; background: #000; border: 1px solid #444; border-radius: 8px; color: #fff; margin-top: 5px; box-sizing: border-box; }
         
-        .btn { background: var(--yt-red); color: white; border: none; padding: 18px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 25px; }
-        .btn:disabled { background: #444; cursor: not-allowed; }
+        .grid-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; }
+        
+        .btn { background: var(--ig-gradient); color: white; border: none; padding: 20px; width: 100%; border-radius: 12px; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 25px; transition: 0.3s; }
+        .btn:hover { transform: scale(1.02); filter: brightness(1.1); }
+        .btn:disabled { background: #444; cursor: not-allowed; filter: grayscale(1); }
 
-        .result-container { display: none; margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
-        .thumbnail-preview { width: 100%; aspect-ratio: 16/9; background: #111; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 2px solid var(--accent); }
-        .thumbnail-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .result-section { display: none; margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
+        .box { background: #000; padding: 20px; border-radius: 10px; border: 1px solid #444; margin-bottom: 20px; position: relative; }
+        .copy-btn { position: absolute; top: 10px; right: 10px; color: #3ea6ff; cursor: pointer; font-size: 11px; font-weight: bold; }
         
-        .strategy-box { background: #000; padding: 20px; border-radius: 10px; border-left: 4px solid var(--accent); margin-top: 20px; font-size: 14px; line-height: 1.6; color: #ccc; }
-        
-        #loader { display: none; text-align: center; color: var(--accent); margin-top: 20px; font-weight: bold; animation: pulse 1.5s infinite; }
+        #loader { display: none; text-align: center; color: #f09433; margin-top: 20px; font-weight: bold; animation: pulse 1.5s infinite; }
         @keyframes pulse { 50% { opacity: 0.5; } }
+        .error-msg { color: #ffbb00; background: #332200; padding: 15px; border-radius: 8px; border: 1px solid #ffbb00; text-align: center; margin-top: 15px; display: none; }
     </style>
 </head>
 <body>
 
 <div class="app-shell">
-    <h2 style="text-align:center; margin-top:0; color: var(--yt-red);">🖼️ Thumbnail Architect v3.0</h2>
-    <div class="usage-bar">Daily Usage: <span id="used" class="usage-count">0</span> / 5 Concept Designs</div>
+    <h1 style="text-align:center; margin-top:0; background: var(--ig-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Instagram Reel Architect</h1>
+    <div class="usage-bar">Daily Limit: <span id="used" class="usage-count">0</span> / 5 Viral Scripts</div>
 
     <label>Gemini API Key</label>
     <input type="password" id="apiKey" placeholder="Paste your API key...">
 
-    <div style="display: flex; gap: 15px;">
-        <div style="flex: 1;">
-            <label>Video Topic</label>
-            <input type="text" id="topic" placeholder="e.g. iPhone 16 Pro Review">
+    <div class="grid-3">
+        <div>
+            <label>Content Category</label>
+            <select id="category">
+                <optgroup label="Education & Tips">
+                    <option>Facts & explanations</option><option>Did you know?</option><option>How-to / Step-by-step</option>
+                    <option>Tips & tricks</option><option>Myth vs Fact</option><option>Tutorials</option>
+                </optgroup>
+                <optgroup label="Business & Sales">
+                    <option>Case studies</option><option>Business tips</option><option>Marketing strategies</option>
+                    <option>Growth tips</option><option>Sales techniques</option><option>Branding advice</option>
+                    <option>Customer psychology</option><option>Lead generation</option><option>Price justification</option>
+                    <option>Objection handling</option><option>Testimonial narration</option>
+                </optgroup>
+                <optgroup label="Finance & Money">
+                    <option>Investment basics</option><option>Saving tips</option><option>Stock market basics</option>
+                    <option>Budget planning</option><option>EMI explanation</option><option>Tax saving tips</option>
+                    <option>Side income models</option>
+                </optgroup>
+                <optgroup label="Self-Improvement">
+                    <option>Motivational talks</option><option>Success stories</option><option>Mindset training</option>
+                    <option>Discipline & habits</option><option>Productivity</option><option>Confidence coaching</option>
+                    <option>Career guidance</option>
+                </optgroup>
+                <optgroup label="Astrology & Spiritual">
+                    <option>Numerology</option><option>Lo Shu Grid</option><option>Astrology basics</option>
+                    <option>Remedies explanation</option><option>Affirmations</option><option>Spiritual education</option>
+                </optgroup>
+                <optgroup label="Tech & AI">
+                    <option>AI tool demos</option><option>ChatGPT usage</option><option>Software tutorials</option>
+                    <option>Tech education</option><option>Digital safety</option>
+                </optgroup>
+                <optgroup label="Lifestyle & Vlogs">
+                    <option>Travel vlog</option><option>Personal Vlog</option><option>Daily Vlog</option>
+                    <option>Product review</option>
+                </optgroup>
+            </select>
         </div>
-        <div style="flex: 1;">
-            <label>Visual Style</label>
-            <select id="style">
-                <option value="cinematic, 8k resolution, dramatic lighting">Cinematic</option>
-                <option value="high saturation, neon colors, MrBeast vibes">Viral / Hyper</option>
-                <option value="clean, minimalist, studio lighting">Minimalist</option>
-                <option value="dark, gritty, documentary style">Moody / Serious</option>
+        <div>
+            <label>Duration</label>
+            <select id="duration">
+                <option value="20 sec">20 Sec</option>
+                <option value="30 sec" selected>30 Sec</option>
+                <option value="45 sec">45 Sec</option>
+                <option value="60 sec">60 Sec</option>
+            </select>
+        </div>
+        <div>
+            <label>Language</label>
+            <select id="lang">
+                <option value="Hinglish (Conversational)">Hinglish</option>
+                <option value="English">English</option>
+                <option value="Easy Hindi">Hindi</option>
             </select>
         </div>
     </div>
 
-    <label>Extra Details / Custom Cues</label>
-    <textarea id="extraNotes" rows="4" placeholder="Example: Show a shocked face on the left, a broken iPhone on the right. Use a glowing red background. Add 'SCAM' in big text."></textarea>
+    <label>What should happen in this script?</label>
+    <textarea id="details" rows="4" placeholder="Example: Tell people 3 ways to save money while traveling..."></textarea>
 
-    <button class="btn" id="genBtn" onclick="generate()">ARCHITECT THUMBNAIL</button>
+    <button class="btn" id="genBtn" onclick="generateReel()">ARCHITECT VIRAL REEL</button>
 
-    <div id="loader">⚡ GEMINI IS MASTERMINDING THE DESIGN...</div>
+    <div id="loader">🚀 ANALYZING HOOKS & TRENDS...</div>
+    <div id="errorBox" class="error-msg"></div>
 
-    <div id="result" class="result-container">
-        <label>Generated Visual Concept</label>
-        <div class="thumbnail-preview">
-            <img id="thumbImg" src="" alt="Thumbnail Preview">
-            <div id="imgPlaceholder" style="color: #444;">GENERATING IMAGE...</div>
+    <div id="results" class="result-section">
+        <div class="box">
+            <span class="copy-btn" onclick="copy('resScript')">COPY</span>
+            <label style="color: var(--accent);">Visual Script (Hook → Body → CTA)</label>
+            <div id="resScript" style="white-space: pre-wrap; margin-top:10px; font-size:14px;"></div>
         </div>
 
-        <div class="strategy-box">
-            <h3 style="color:var(--accent); margin-top:0;">CTR Logic (Hinglish)</h3>
-            <div id="strategyText"></div>
+        <div class="box">
+            <span class="copy-btn" onclick="copy('resSEO')">COPY</span>
+            <label style="color: var(--success);">Viral Caption & Hashtags</label>
+            <div id="resSEO" style="white-space: pre-wrap; margin-top:10px; font-size:14px;"></div>
         </div>
     </div>
 </div>
@@ -79,7 +124,7 @@
 
     window.onload = () => {
         updateUsageUI();
-        const key = localStorage.getItem('_th_v3_key');
+        const key = localStorage.getItem('_ig_architect_key');
         if (key) document.getElementById('apiKey').value = key;
     };
 
@@ -87,53 +132,55 @@
         const usage = getUsage();
         document.getElementById('used').innerText = usage;
         if (usage >= MAX_DAILY) {
-            const btn = document.getElementById('genBtn');
-            btn.disabled = true;
-            btn.innerText = "LIMIT REACHED (5/5)";
+            document.getElementById('genBtn').disabled = true;
+            document.getElementById('genBtn').innerText = "LIMIT REACHED (KAL AANA!)";
         }
     }
 
     function getUsage() {
         const date = new Date().toISOString().split('T')[0];
-        const data = JSON.parse(localStorage.getItem('_th_usage_v3') || '{}');
+        const data = JSON.parse(localStorage.getItem('_ig_usage_v1') || '{}');
         return data[date] || 0;
     }
 
-    function incrementUsage() {
+    function trackUsage() {
         const date = new Date().toISOString().split('T')[0];
-        const data = JSON.parse(localStorage.getItem('_th_usage_v3') || '{}');
+        const data = JSON.parse(localStorage.getItem('_ig_usage_v1') || '{}');
         data[date] = (data[date] || 0) + 1;
-        localStorage.setItem('_th_usage_v3', JSON.stringify(data));
+        localStorage.setItem('_ig_usage_v1', JSON.stringify(data));
         updateUsageUI();
     }
 
-    async function generate() {
+    async function generateReel() {
         const key = document.getElementById('apiKey').value.trim();
-        const topic = document.getElementById('topic').value;
-        const style = document.getElementById('style').value;
-        const extra = document.getElementById('extraNotes').value;
+        const cat = document.getElementById('category').value;
+        const dur = document.getElementById('duration').value;
+        const lang = document.getElementById('lang').value;
+        const details = document.getElementById('details').value;
         
-        if (!key || !topic) return alert("Bhai, Key aur Topic dono chahiye!");
+        const loader = document.getElementById('loader');
+        const results = document.getElementById('results');
+        const errorBox = document.getElementById('errorBox');
+
+        if (!key || !details) return alert("Bhai, Key aur Details dono bharna padega!");
         if (getUsage() >= MAX_DAILY) return alert("Daily limit over!");
 
-        localStorage.setItem('_th_v3_key', key);
-        const loader = document.getElementById('loader');
-        const result = document.getElementById('result');
-        const img = document.getElementById('thumbImg');
-        const placeholder = document.getElementById('imgPlaceholder');
-        
-        loader.style.display = "block";
-        result.style.display = "none";
-        img.style.display = "none";
-        placeholder.style.display = "block";
+        localStorage.setItem('_ig_architect_key', key);
+        loader.style.display = 'block';
+        results.style.display = 'none';
+        errorBox.style.display = 'none';
 
-        // Advanced Prompt with extra details
-        const prompt = `Act as a Viral Thumbnail Expert. Topic: "${topic}". Style: "${style}". 
-        Special User Instructions: "${extra}".
+        const prompt = `Act as a Viral Instagram Content Strategist. 
+        Category: "${cat}". Duration: ${dur}. Language: ${lang}. 
+        Details: "${details}".
+
+        TASK:
+        1. Write a ${dur} script. Include a high-energy HOOK (first 3 sec), the BODY (value), and a clear CTA (Save/Follow).
+        2. Write a viral SEO Caption (3-4 lines) and 10 relevant niche hashtags.
         
-        1. STRATEGY: Create a 3-line CTR guide in Hinglish explaining where to put text/faces based on the extra instructions.
-        2. PROMPT: Create a clean, descriptive 15-word English prompt for the background image. 
-        Format strictly as STRATEGY: [text] PROMPT: [text]`;
+        Format exactly as:
+        SCRIPT: [The full script with Visual Cues in brackets]
+        SEO: [Caption and Hashtags]`;
 
         try {
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
@@ -144,32 +191,33 @@
             });
 
             const data = await response.json();
-            const text = data.candidates[0].content.parts[0].text;
-            
-            const strategy = text.split('STRATEGY:')[1].split('PROMPT:')[0].trim();
-            const rawPrompt = text.split('PROMPT:')[1].trim();
-            
-            // Clean prompt for the image engine
-            const cleanImgPrompt = rawPrompt.replace(/[^a-zA-Z0-9 ]/g, "").substring(0, 150);
 
-            document.getElementById('strategyText').innerText = strategy;
-            
-            const seed = Math.floor(Math.random() * 99999);
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanImgPrompt)}?width=1280&height=720&nologo=true&seed=${seed}`;
-            
-            img.src = imageUrl;
-            img.onload = () => {
-                loader.style.display = "none";
-                result.style.display = "block";
-                img.style.display = "block";
-                placeholder.style.display = "none";
-                incrementUsage();
-            };
-
+            if (response.status === 429) {
+                errorBox.innerText = "Bhai, this is your current limit for the day. Come back tomorrow after 24 hours to generate more!";
+                errorBox.style.display = "block";
+            } else if (data.candidates) {
+                const fullText = data.candidates[0].content.parts[0].text;
+                document.getElementById('resScript').innerText = fullText.split('SCRIPT:')[1]?.split('SEO:')[0]?.trim();
+                document.getElementById('resSEO').innerText = fullText.split('SEO:')[1]?.trim();
+                
+                results.style.display = 'block';
+                trackUsage();
+            } else {
+                throw new Error("API Issue. Please check your key.");
+            }
         } catch (err) {
-            loader.style.display = "none";
-            alert("API Error: " + err.message);
+            errorBox.innerText = "Error: " + err.message;
+            errorBox.style.display = "block";
+        } finally {
+            loader.style.display = 'none';
         }
+    }
+
+    function copy(id) {
+        const el = document.getElementById(id);
+        const text = el.innerText || el.value;
+        navigator.clipboard.writeText(text);
+        alert("Copied to clipboard!");
     }
 </script>
 
